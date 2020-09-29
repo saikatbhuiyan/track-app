@@ -10,13 +10,21 @@ class TrackType(DjangoObjectType):
         model = Track
 
 
+class LikeType(DjangoObjectType):
+    class Meta:
+        model = Like
+
+
 # """Get All Tracks"""
 class Query(graphene.ObjectType):
     tracks = graphene.List(TrackType)
+    likes = graphene.List(LikeType)
 
     def resolve_tracks(self, info):
         return Track.objects.all()
 
+    def resolve_likes(self, info):
+        return Like.objects.all()
 
 # """Create Track"""
 class CreateTrack(graphene.Mutation):
