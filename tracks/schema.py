@@ -1,5 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
+from graphql import GraphQLError
+from django.db.models import Q
 
 from .models import Track, Like
 from users.schema import UserType
@@ -17,10 +19,20 @@ class LikeType(DjangoObjectType):
 
 # """Get All Tracks"""
 class Query(graphene.ObjectType):
-    tracks = graphene.List(TrackType)
+    tracks = graphene.List(TrackType, search=graphene.String())
     likes = graphene.List(LikeType)
 
-    def resolve_tracks(self, info):
+    def resolve_tracks(self, info, search=None):
+
+        if search:
+            filter = (
+                Q(title__icontains=search) |
+                Q(description__icontains=search) |
+                Q(url__icontains=search) |
+                Q(posted_by__username__icontains=search)
+            )
+            return Track.objects.filter(filter)
+
         return Track.objects.all()
 
     def resolve_likes(self, info):
@@ -70,8 +82,8 @@ class UpdateTrack(graphene.Mutation):
         track = Track.objects.get(id=track_id)
 
         if track.posted_by != user:
-            raise Exception("Don't have permission to update this track.")
-
+            raise GraphQLError("Don't have permission to update this track.")
+        # GraphQLError and Exception both work same
         if user.is_anonymous:
             raise Exception("User not logged in.")
 
