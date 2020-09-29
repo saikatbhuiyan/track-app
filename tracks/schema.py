@@ -34,7 +34,13 @@ class CreateTrack(graphene.Mutation):
     #     return CreateTrack(track=track)
 
     def mutate(self, info, title, description, url):
-        track = Track(title=title, description=description, url=url)
+        user = info.context.user
+        if user.is_anonymous:
+            raise Exception("User not logged in.")
+
+        track = Track(title=title,
+                      description=description,
+                      url=url, posted_by=user)
         track.save()
         return CreateTrack(track=track)
 
