@@ -8,6 +8,7 @@ class TrackType(DjangoObjectType):
         model = Track
 
 
+# """Get All Tracks"""
 class Query(graphene.ObjectType):
     tracks = graphene.List(TrackType)
 
@@ -15,6 +16,7 @@ class Query(graphene.ObjectType):
         return Track.objects.all()
 
 
+# """Create Track"""
 class CreateTrack(graphene.Mutation):
     track = graphene.Field(TrackType)
 
